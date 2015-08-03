@@ -74,6 +74,7 @@ var sample = {
 var insertion_rate = 150;  // number of inserts per second
 var count=0;
 var hdb = db.getSiblingDB("his");
+hdb.tx0.ensureIndex({ACC:1, ADT:1, CCY:1, SEQ:1});
 while(true){
     var start = new Date();
     var docs = [];
@@ -99,11 +100,12 @@ while(true){
 }
 function today() {
     var d = new Date();
-    var str = d.getYear+1900 +"-";
+    var str = (d.getYear() +1900 )+"-";
     if(d.getMonth()+1 < 10) str+="0";
-    str+=(d.getMonth+1);
+    str+=(d.getMonth()+1);
+    str+="-";
     if(d.getDate()  < 10) str+="0";
-    str+=d.getDate();
+    str+= d.getDate();
     return str +" 00:00:00";
 }
 function random(max){ return Math.round(Math.random()* max) }; 
