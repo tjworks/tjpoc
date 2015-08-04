@@ -22,6 +22,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCursor;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
+import  com.mongodb.client.model.Sorts;
 
 /**
  * MongoDB PoC client for Pingan
@@ -51,7 +52,9 @@ public class MongoPoc   {
         int indx = ((int) (Math.random() * 100) ) % dbs.length;
         MongoDatabase db = dbs[indx];
         if(db == null){
-            throw new RuntimeException("Null db at index " + indx);
+            System.err.println("NulldbatIndex "+ indx);
+            System.err.println(dbs);
+            throw new RuntimeException("Null db at index " + indx+" "+ dbs);
         }
         String ret = "";
         if(hasToday(to_date)){
@@ -105,6 +108,7 @@ public class MongoPoc   {
             cursor = coll.find(query)
                         .projection(projections )
                         .noCursorTimeout(true)
+                        .sort( Sorts.ascending("ACC","ADT","CCY", "SEQ"))
                         .limit(25000)
                         .iterator();
             while(cursor.hasNext()) {                    
@@ -153,6 +157,7 @@ public class MongoPoc   {
         init(urls, dbname, colname);
     }
     public static void init(String[] urls, String dbname, String cname){
+        if(initialized ) return;
         System.err.println("Initializing version 0.03");
         Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
         mongoLogger.setLevel(Level.SEVERE);

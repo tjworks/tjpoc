@@ -25,7 +25,7 @@ public class MongoPocTest
      */
     public static Test suite()
     {
-        MongoPoc.init(null,null,null);
+        MongoPoc.init("mongodb://localhost:27017",null,null);
         return new TestSuite( MongoPocTest.class );
     }
 
