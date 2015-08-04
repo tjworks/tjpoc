@@ -47,14 +47,19 @@ public class MongoPoc   {
     public static String runQuery(Long account, String from_date, String to_date,
         String ccy, Double min_amount, Double max_amount, Long trace) throws Exception     
     {
+        
+        int indx = (int) (Math.random() * dbs.length);
+        MongoDatabase db = dbs[indx];
+        
         String ret = "";
         if(hasToday(to_date)){
+            MongoCollection todayColl = db.getCollection( colname+"0" );
             System.out.println("### Running query against both today and history collections ###");
             ret  += runQuery(account, from_date, to_date, ccy, min_amount, max_amount, trace, todayColl);   
             ret  += "\nDUALQUERY\n";
         }
-        ret +=runQuery(account, from_date, to_date, ccy, min_amount, max_amount, trace, hisColl);   
-        
+        MongoCollection hisColl = db.getCollection( colname );
+        ret +=runQuery(account, from_date, to_date, ccy, min_amount, max_amount, trace, hisColl);           
         return ret;
     }    
 
@@ -92,6 +97,7 @@ public class MongoPoc   {
         Date start = new Date();
         MongoCursor cursor =  null;
         int count=0;    
+
         try {
             // execute the query
             cursor = coll.find(query)
@@ -140,19 +146,26 @@ public class MongoPoc   {
          System.out.println();
     }
    
-    
     public static void init(String url, String dbname, String colname){
+        String[] urls = { url };
+        init(urls, dbname, colname);
+    }
+    public static void init(String[] urls, String dbname, String cname){
 
         Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
         mongoLogger.setLevel(Level.SEVERE);
-        if(url == null) url = "mongodb://localhost:27017";
+        
         if(dbname == null) dbname = "histxn";
-        if(colname == null) colname = "tx";
-        System.out.println("Mongo URL: "+ url+"/"+dbname+"."+ colname );       
-        mongoClient = new MongoClient( new MongoClientURI(url));
-        MongoDatabase db = mongoClient.getDatabase(dbname);
-        hisColl = db.getCollection( colname );
-        todayColl = db.getCollection( colname+"0" );
+        if(cname == null) cname = "tx";
+        colname = cname;        
+        dbs = new MongoDatabase[urls.length];
+        for(int i=0;i<urls.length;i++){
+            String url = urls[i];
+            if(url == null) url = "mongodb://localhost:27017";
+            System.out.println("Mongo URL: "+ url+"/"+dbname+"."+ colname );       
+            MongoClient mongoClient = new MongoClient( new MongoClientURI(url));
+            dbs[i] = mongoClient.getDatabase(dbname);
+        }        
         initialized = true;
     }    
     public static void runQuery(Map<String,String> props) throws Exception {
@@ -188,10 +201,12 @@ public class MongoPoc   {
             return runQuery(acct, from_date, to_date, ccy, min, max, trc);
     }
 
-    private static MongoClient mongoClient = null;
-    private static MongoCollection<Document> hisColl = null;
-    private static MongoCollection<Document> todayColl = null;
+    
+    private static MongoDatabase[] dbs = null;
+    private  MongoCollection<Document> hisColl = null;
+    private  MongoCollection<Document> todayColl = null;
     private static boolean initialized = false;
+    private static String colname = null;
 
     public static void main(String[] args){
         System.out.println("POC client");
