@@ -48,9 +48,11 @@ public class MongoPoc   {
         String ccy, Double min_amount, Double max_amount, Long trace) throws Exception     
     {
         
-        int indx = (int) (Math.random() * dbs.length);
+        int indx = ((int) (Math.random() * 100) ) % dbs.length;
         MongoDatabase db = dbs[indx];
-        
+        if(db == null){
+            throw new RuntimeException("Null db at index " + indx);
+        }
         String ret = "";
         if(hasToday(to_date)){
             MongoCollection todayColl = db.getCollection( colname+"0" );
@@ -107,7 +109,7 @@ public class MongoPoc   {
                         .iterator();
             while(cursor.hasNext()) {                    
                count++;   
-               cursor.next();                                   
+               Object o = cursor.next();                                   
            }
                 
         } catch(Exception e){
@@ -151,7 +153,7 @@ public class MongoPoc   {
         init(urls, dbname, colname);
     }
     public static void init(String[] urls, String dbname, String cname){
-
+        System.err.println("Initializing version 0.03");
         Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
         mongoLogger.setLevel(Level.SEVERE);
         
@@ -162,9 +164,10 @@ public class MongoPoc   {
         for(int i=0;i<urls.length;i++){
             String url = urls[i];
             if(url == null) url = "mongodb://localhost:27017";
-            System.out.println("Mongo URL: "+ url+"/"+dbname+"."+ colname );       
+            
             MongoClient mongoClient = new MongoClient( new MongoClientURI(url));
             dbs[i] = mongoClient.getDatabase(dbname);
+            System.out.println("Mongo URL: "+ url+"/"+dbname+"."+ colname +" "+ dbs[i]);       
         }        
         initialized = true;
     }    
