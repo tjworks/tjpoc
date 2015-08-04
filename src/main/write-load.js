@@ -84,7 +84,7 @@ while(true){
             obj[k] = sample[k];
         }
         obj.ADT = today();
-        obj.ACC = random(12100184624)
+        obj.ACC = random(1000000)
         obj.SEQ = random(100);
         docs.push(obj);
     }
