@@ -109,11 +109,11 @@ public class MongoPoc   {
                         .projection(projections )
                         .noCursorTimeout(true)
                         .sort( Sorts.ascending("ACC","ADT","CCY", "SEQ"))
-                        .limit(25000)
+                        .limit(5000)
                         .iterator();
             while(cursor.hasNext()) {                    
                count++;   
-               Object o = cursor.next();                                   
+               cursor.next();                                   
            }
                 
         } catch(Exception e){
@@ -158,7 +158,7 @@ public class MongoPoc   {
     }
     public static void init(String[] urls, String dbname, String cname){
         if(initialized ) return;
-        System.err.println("Initializing version 0.03");
+        System.err.println("Initializing version 0.4");
         Logger mongoLogger = Logger.getLogger( "org.mongodb.driver" );
         mongoLogger.setLevel(Level.SEVERE);
         
